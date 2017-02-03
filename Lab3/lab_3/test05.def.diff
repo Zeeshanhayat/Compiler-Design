@@ -1,0 +1,7 @@
+1,3c1,2
+< Variable count may be uninitialized on line 10
+< Variable count may be uninitialized on line 12
+< Variable count may be uninitialized on line 15
+---
+> opt-3.5: Unknown command line argument '-def-pass'.  Try: 'opt-3.5 -help'
+> opt-3.5: Did you mean '-debug-pass'?

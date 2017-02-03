@@ -1,0 +1,10 @@
+1,6c1,2
+< Variable k may be uninitialized on line 14
+< Variable f may be uninitialized on line 15
+< Variable d may be uninitialized on line 16
+< Variable k may be uninitialized on line 19
+< Variable f may be uninitialized on line 19
+< Variable d may be uninitialized on line 19
+---
+> opt-3.5: Unknown command line argument '-def-pass'.  Try: 'opt-3.5 -help'
+> opt-3.5: Did you mean '-debug-pass'?
