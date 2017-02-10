@@ -77,18 +77,19 @@ public:
     // Initialiying the Worklist
   //std::SmallVector<Instruction *, 64> WorkList;
 
-   std::set<Instruction*> WorkList;
+   //std::set<Instruction*> WorkList;
+     SmallVector<Value *, 64> WorkList;
    for(inst_iterator i = inst_begin(F), e = inst_end(F); i != e; ++i) {
        WorkList.insert(&*i);
    }
-    Constant *InstResult = nullptr;
     while (!WorkList.empty()) {
     Instruction *I = *WorkList.begin();
     WorkList.erase(WorkList.begin());    // Get an element from the worklist...
     
     if (!I->use_empty()) {
-    
-     /*if (BinaryOperator *BO = dyn_cast<BinaryOperator>(I)) {
+      Instruction *BO = cast<Instruction>(I);
+      visitBinaryOperator(*BO);
+     if (BinaryOperator *BO = dyn_cast<BinaryOperator>(I)) {
       InstResult = ConstantExpr::get(BO->getOpcode(),
                                      getVal(BO->getOperand(0)),
                                      getVal(BO->getOperand(1)));
@@ -106,7 +107,7 @@ public:
                                          CI->getType());
       errs() << "Found a Cast! Simplifying: " << *InstResult
             << "\n";
-    }*/
+    }
   }
 }
     printResults(F);
@@ -115,30 +116,7 @@ public:
 
   void visitPHINode(PHINode &P) {
     // TODO
-     bool Changed = false;
-
-  BasicBlock *BB = P->getParent();
-  for (unsigned i = 0, e = P->getNumIncomingValues(); i < e; ++i) {
-    Value *Incoming = P->getIncomingValue(i);
-    if (isa<Constant>(Incoming)) continue;
-
-    Constant *C = LVI->getConstantOnEdge(P->getIncomingValue(i),
-                                         P->getIncomingBlock(i),
-                                         BB);
-    if (!C) continue;
-
-    P->setIncomingValue(i, C);
-    Changed = true;
-  }
-
-  if (Value *V = SimplifyInstruction(P)) {
-    P->replaceAllUsesWith(V);
-    P->eraseFromParent();
-    Changed = true;
-  }
-
-  ++NumPhis;
-
+ 
   //return Changed;
   }
   
@@ -146,23 +124,31 @@ public:
   void visitBinaryOperator(Instruction &I) {
     // TODO
     // Hint: ConstExpr::get()
+    InstResult = ConstantExpr::get(I->getOpcode(), I->getOperand(0), I->getOperand(1));
+    //errs() << "Found a BinaryOperator! Simplifying: " << *InstResult << "\n";
+   
   }
 
-
+/*
   void visitCmpInst(CmpInst &I) {
     // TODO
     // Hint: ConstExpr::getCompare()
+    InstResult = ConstantExpr::getCompare(CI->getPredicate(), getVal(CI->getOperand(0)), getVal(CI->getOperand(1)));
+    errs() << "Found a CmpInst! Simplifying: " << *InstResult << "\n";
+   
   }
 
   void visitCastInst(CastInst &I) {
     // TODO
     // Hint: ConstExpr::getCast()
+    InstResult = ConstantExpr::getCast(CI->getOpcode(), getVal(CI->getOperand(0)), CI->getType());
+   
   }
 
   void visitInstruction(Instruction &I) {
     // TODO Fallback case
   }
-
+*/
 private:
   /* Gets the current state of a Value. This method also lazily
    * initializes the state if there is no entry in the StateMap
@@ -203,9 +189,10 @@ private:
   }
 
   // Map from Values to their current State
+  Constant *InstResult = nullptr;
   DenseMap<Value *, State> StateMap;
   // Worklist of instructions that need to be (re)processed
-  SmallVector<Value *, 64> WorkList;
+//  SmallVector<Value *, 64> WorkList;
 };
 
 }
